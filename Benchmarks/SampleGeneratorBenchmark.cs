@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 namespace DevSample.Benchmarks
 {
     /// <summary>
-    /// Benchmarks different approaches to loading samples.
-    /// Compares: Insert(0), Add + Reverse, and LinkedList approaches.
+    /// Benchmarks different approaches to loading and validating samples.
     /// </summary>
     class SampleGeneratorBenchmark
     {
@@ -24,7 +23,7 @@ namespace DevSample.Benchmarks
         }
 
         /// <summary>
-        /// Runs the benchmark comparing different load methods.
+        /// Runs the benchmark comparing different sample loading methods.
         /// </summary>
         public void LoadSamples()
         {
@@ -88,7 +87,6 @@ namespace DevSample.Benchmarks
                     date += _sampleIncrement;
                 }
 
-                // Convert back to List for consistency
                 var list = linkedList.ToList();
             }
             sw.Stop();
@@ -130,7 +128,6 @@ namespace DevSample.Benchmarks
                     concurrentBag.Add((i, s));
                 });
 
-                // Sort by index descending to maintain time-descending order
                 var list = concurrentBag.OrderByDescending(x => x.index).Select(x => x.sample).ToList();
             }
             sw.Stop();
@@ -151,7 +148,6 @@ namespace DevSample.Benchmarks
                     samples[i] = s;
                 });
 
-                // Reverse array to maintain time-descending order
                 Array.Reverse(samples);
                 var list = samples.ToList();
             }
@@ -182,13 +178,13 @@ namespace DevSample.Benchmarks
         }
 
         /// <summary>
-        /// Runs the benchmark comparing different validation methods.
+        /// Runs the benchmark comparing different sample validation methods.
         /// </summary>
         public void ValidateSamples()
         {
             Console.WriteLine("\n========== VALIDATE SAMPLES BENCHMARK ==========\n");
 
-            // First, generate samples to validate
+            // Generate samples to validate
             var sampleGenerator = new SampleGenerator(_sampleStartDate, _sampleIncrement);
             sampleGenerator.LoadSamples(_samplesToLoad);
 

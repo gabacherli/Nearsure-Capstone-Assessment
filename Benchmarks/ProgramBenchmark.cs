@@ -6,7 +6,6 @@ namespace DevSample.Benchmarks
 {
     /// <summary>
     /// Benchmarks different approaches to summing sample values.
-    /// Compares: foreach loop, LINQ Sum(), and manual for loop.
     /// </summary>
     class ProgramBenchmark
     {
@@ -22,13 +21,13 @@ namespace DevSample.Benchmarks
         }
 
         /// <summary>
-        /// Runs the benchmark comparing different sum methods.
+        /// Runs the benchmark comparing different sum calculation methods.
         /// </summary>
         public void SumSamples()
         {
             Console.WriteLine("\n========== SUM SAMPLES BENCHMARK ==========\n");
 
-            // Create a sample generator with test data
+            // Generate test data
             SampleGenerator testGenerator = new SampleGenerator(_sampleStartDate, _sampleIncrement);
             testGenerator.LoadSamples(_samplesToLoad);
 
@@ -83,7 +82,7 @@ namespace DevSample.Benchmarks
             double aggregateTime = sw.Elapsed.TotalMilliseconds;
             Console.WriteLine($"LINQ Aggregate:     {aggregateTime:F2} ms ({iterations} iterations)");
 
-            // Benchmark 5: PLINQ Sum (parallel)
+            // Benchmark 5: PLINQ Sum()
             sw.Restart();
             for (int iter = 0; iter < iterations; iter++)
             {
@@ -93,7 +92,7 @@ namespace DevSample.Benchmarks
             double plinqTime = sw.Elapsed.TotalMilliseconds;
             Console.WriteLine($"PLINQ Sum():        {plinqTime:F2} ms ({iterations} iterations)");
 
-            // Benchmark 6: PLINQ Aggregate (parallel)
+            // Benchmark 6: PLINQ Aggregate()
             sw.Restart();
             for (int iter = 0; iter < iterations; iter++)
             {
