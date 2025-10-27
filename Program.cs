@@ -45,23 +45,21 @@ namespace DevSample
             {
                 try
                 {
-
-                    TimeSpan cycleElapsedTime = new TimeSpan();
-
                     Stopwatch cycleTimer = new Stopwatch();
 
                     SampleGenerator sampleGenerator = new SampleGenerator(_sampleStartDate, _sampleIncrement);
 
                     LogMessage("Cycle {0} Started Sample Load.", i);
 
+                    // Track total cycle time from start of load to end of sum calculation
                     cycleTimer.Start();
 
                     sampleGenerator.LoadSamples(_samplesToLoad);
 
                     cycleTimer.Stop();
-                    cycleElapsedTime = cycleTimer.Elapsed;
+                    double loadTime = cycleTimer.Elapsed.TotalMilliseconds;
 
-                    LogMessage("Cycle {0} Finished Sample Load. Load Time: {1:N} ms.", i, cycleElapsedTime.TotalMilliseconds);
+                    LogMessage("Cycle {0} Finished Sample Load. Load Time: {1:N} ms.", i, loadTime);
 
                     LogMessage("Cycle {0} Started Sample Validation.", i);
 
@@ -70,20 +68,31 @@ namespace DevSample
                     sampleGenerator.ValidateSamples();
 
                     cycleTimer.Stop();
-                    cycleElapsedTime = cycleTimer.Elapsed;
+                    double validationTime = cycleTimer.Elapsed.TotalMilliseconds;
 
-                    LogMessage("Cycle {0} Finished Sample Validation. Total Samples Validated: {1}. Validation Time: {2:N} ms.", i, sampleGenerator.SamplesValidated, cycleElapsedTime.TotalMilliseconds);
+                    LogMessage("Cycle {0} Finished Sample Validation. Total Samples Validated: {1}. Validation Time: {2:N} ms.", i, sampleGenerator.SamplesValidated, validationTime);
 
-                    float valueSum = 0;
+                    decimal valueSum = 0;
+
+                    LogMessage("Cycle {0} Started Sample Sum.", i);
+
+                    cycleTimer.Restart();
 
                     foreach (Sample s in sampleGenerator.Samples)
                     {
                         valueSum += s.Value;
                     }
 
-                    LogMessage("Cycle {0} Sum of All Samples: {1:N}.", i, valueSum);
+                    cycleTimer.Stop();
+                    double sumCalculationTime = cycleTimer.Elapsed.TotalMilliseconds;
 
-                    LogMessage("Cycle {0} Finished. Total Cycle Time: {1:N} ms.", i, cycleElapsedTime.TotalMilliseconds);
+                    LogMessage("Cycle {0} Finished Sample Sum. Sum Time: {1:N} ms.", i, sumCalculationTime);
+
+                    // Display sum with full precision (G format shows all significant digits)
+                    LogMessage("Cycle {0} Sum of All Samples: {1:G}.", i, valueSum);
+
+                    double totalCycleTime = loadTime + validationTime + sumCalculationTime;
+                    LogMessage("Cycle {0} Finished. Total Cycle Time: {1:N} ms.", i, totalCycleTime);
                 }
                 catch (Exception ex)
                 {
