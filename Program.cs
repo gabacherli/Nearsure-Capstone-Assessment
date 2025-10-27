@@ -121,7 +121,7 @@ namespace DevSample
 
         static decimal SumSamples(SampleGenerator sampleGenerator)
         {
-            // Optimized: Using PLINQ Sum() for 9.2x performance improvement over foreach.
+            // Optimized: Using PLINQ Sum() for ~3-10x performance improvement over foreach.
             // See ProgramBenchmark.cs for detailed performance comparison of different sum methods.
             return sampleGenerator.Samples.AsParallel().Sum(s => (decimal)s.Value);
         }

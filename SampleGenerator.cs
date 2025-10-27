@@ -26,7 +26,7 @@ namespace DevSample
 
         public void LoadSamples(int samplesToGenerate)
         {
-            // Optimized: Using Parallel.For with array for 147x performance improvement over Insert(0).
+            // Optimized: Using Parallel.For with array for ~80-150x performance improvement over Insert(0).
             // See SampleGeneratorBenchmark.cs for detailed performance comparison of different load methods.
             _sampleList.Clear();
 
@@ -51,7 +51,7 @@ namespace DevSample
 
         public void ValidateSamples()
         {
-            // Optimized: Using PLINQ for 15x performance improvement over sequential for loop.
+            // Optimized: Using PLINQ for ~10-15x performance improvement over sequential for loop.
             // See SampleGeneratorBenchmark.cs for detailed performance comparison of different validation methods.
             SamplesValidated = _sampleList
                 .Select((sample, index) => new { sample, index })
