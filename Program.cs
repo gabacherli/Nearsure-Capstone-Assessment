@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Configuration;
 using System.Diagnostics;
+using System.IO;
+using System.Text;
 
 namespace DevSample
 {
@@ -9,6 +12,8 @@ namespace DevSample
         static readonly int _samplesToLoad;
         static readonly DateTime _sampleStartDate;
         static readonly TimeSpan _sampleIncrement;
+        static readonly string _logFilePath;
+        static readonly StringBuilder _logBuffer = new StringBuilder();
 
         static Program()
         {
@@ -18,14 +23,23 @@ namespace DevSample
             _samplesToLoad = 222222;
             _sampleStartDate = new DateTime(1990, 1, 1, 1, 1, 1, 1);
             _sampleIncrement = new TimeSpan(0, 5, 0);
+
+            bool isLocal = bool.TryParse(ConfigurationManager.AppSettings["IS_LOCAL"], out bool result) && result;
+            string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+
+            var logDirectory = isLocal ? Path.Combine("../../temp") : @"C:\temp";
+
+            _logFilePath = Path.Combine(logDirectory, $"Log_{timestamp}.txt");
+
+            Directory.CreateDirectory(logDirectory);
         }
 
-        static void Main(string[] args)
+        static void Main()
         {
             Stopwatch totalMonitor = new Stopwatch();
             totalMonitor.Start();
 
-            LogMessage($"Starting Execution on a {Environment.ProcessorCount} core system. A total of {_cyclesToRun} cycles will be run");
+            LogMessage("Starting Execution on a {0} core system. A total of {1} cycles will be run", Environment.ProcessorCount, _cyclesToRun);
 
             for (int i = 0; i < _cyclesToRun; i++)
             {
@@ -38,7 +52,7 @@ namespace DevSample
 
                     SampleGenerator sampleGenerator = new SampleGenerator(_sampleStartDate, _sampleIncrement);
 
-                    LogMessage($"Cycle {i} Started Sample Load.");
+                    LogMessage("Cycle {0} Started Sample Load.", i);
 
                     cycleTimer.Start();
 
@@ -47,9 +61,9 @@ namespace DevSample
                     cycleTimer.Stop();
                     cycleElapsedTime = cycleTimer.Elapsed;
 
-                    LogMessage($"Cycle {i} Finished Sample Load. Load Time: {cycleElapsedTime.TotalMilliseconds.ToString("N")} ms.");
+                    LogMessage("Cycle {0} Finished Sample Load. Load Time: {1:N} ms.", i, cycleElapsedTime.TotalMilliseconds);
 
-                    LogMessage($"Cycle {i} Started Sample Validation.");
+                    LogMessage("Cycle {0} Started Sample Validation.", i);
 
                     cycleTimer.Restart();
 
@@ -58,7 +72,7 @@ namespace DevSample
                     cycleTimer.Stop();
                     cycleElapsedTime = cycleTimer.Elapsed;
 
-                    LogMessage($"Cycle {i} Finished Sample Validation. Total Samples Validated: {sampleGenerator.SamplesValidated}. Validation Time: {cycleElapsedTime.TotalMilliseconds.ToString("N")} ms.");
+                    LogMessage("Cycle {0} Finished Sample Validation. Total Samples Validated: {1}. Validation Time: {2:N} ms.", i, sampleGenerator.SamplesValidated, cycleElapsedTime.TotalMilliseconds);
 
                     float valueSum = 0;
 
@@ -67,36 +81,59 @@ namespace DevSample
                         valueSum += s.Value;
                     }
 
-                    //TODO: why do we only seem to get 7 digits of precision? The CEO wants to see at least 20!
-                    LogMessage($"Cycle {i} Sum of All Samples: {valueSum.ToString("N")}.");
+                    LogMessage("Cycle {0} Sum of All Samples: {1:N}.", i, valueSum);
 
-                    LogMessage($"Cycle {i} Finished. Total Cycle Time: {cycleElapsedTime.TotalMilliseconds.ToString("N")} ms.");
+                    LogMessage("Cycle {0} Finished. Total Cycle Time: {1:N} ms.", i, cycleElapsedTime.TotalMilliseconds);
                 }
                 catch (Exception ex)
                 {
-                    LogMessage($"Execution Failed!\n{ex.ToString()}");
+                    LogMessage("Execution Failed!\n{0}", ex.ToString());
                 }
             }
 
             totalMonitor.Stop();
 
             LogMessage("-----");
-            LogMessage($"Execution Finished. Total Elapsed Time: {totalMonitor.Elapsed.TotalMilliseconds.ToString("N")} ms.");
+            LogMessage("Execution Finished. Total Elapsed Time: {0:N} ms.", totalMonitor.Elapsed.TotalMilliseconds);
+
+            FlushBufferToLogFile();
 
             Console.Read();
         }
 
-        static void LogMessage(string message)
+        /// <summary>
+        /// Logs a message to both the console and the internal log buffer.
+        /// </summary>
+        /// <param name="message">The message to log, optionally containing parameter placeholders.</param>
+        /// <param name="args">Optional arguments to format into the message. Also useful in case we need structured logging in the future.</param>
+        static void LogMessage(string message, params object[] args)
         {
-            LogToFile(message);
-            Console.WriteLine($"{DateTime.Now:HH:mm:ss.fffff} - {message}");
+            string formattedMessage = args.Length > 0 ? string.Format(message, args) : message;
+
+            Console.WriteLine($"{DateTime.Now:HH:mm:ss.fffff} - {formattedMessage}");
+            _logBuffer.AppendLine(formattedMessage);
         }
 
-        static void LogToFile(string message)
+        /// <summary>
+        /// Flushes all buffered log messages to the log file.
+        /// </summary>
+        static void FlushBufferToLogFile()
         {
-            //TODO: implement this when someone complains about it not working... 
-            //everything written to the console should also be written to a log under C:\Temp. A new log with a unique file name should be created each time the application is run.
+            if (_logBuffer.Length > 0)
+            {
+                string output = _logBuffer.ToString();
 
+                try
+                {
+                    File.WriteAllText(_logFilePath, output);
+                }
+                catch (Exception ex)
+        {
+                    Console.WriteLine($"Failed to write logs to file: {ex.Message}");
+                }
+
+                _logBuffer.Clear();
+            }
         }
     }
 }
