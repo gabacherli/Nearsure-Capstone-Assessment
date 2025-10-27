@@ -54,10 +54,11 @@ namespace DevSample
             // Optimized: Using PLINQ for 15x performance improvement over sequential for loop.
             // See SampleGeneratorBenchmark.cs for detailed performance comparison of different validation methods.
             SamplesValidated = _sampleList
+                .Select((sample, index) => new { sample, index })
                 .AsParallel()
-                .Where((sample, index) =>
-                    sample.ValidateSample(
-                        index < _sampleList.Count - 1 ? _sampleList[index + 1] : null,
+                .Where(x =>
+                    x.sample.ValidateSample(
+                        x.index < _sampleList.Count - 1 ? _sampleList[x.index + 1] : null,
                         _sampleIncrement))
                 .Count();
         }
