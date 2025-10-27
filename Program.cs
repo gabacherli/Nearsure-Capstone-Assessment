@@ -111,7 +111,7 @@ namespace DevSample
             string formattedMessage = args.Length > 0 ? string.Format(message, args) : message;
 
             Console.WriteLine($"{DateTime.Now:HH:mm:ss.fffff} - {formattedMessage}");
-            _logBuffer.AppendLine(formattedMessage);
+            _logBuffer.AppendLine($"{DateTime.Now:HH:mm:ss.fffff} - {formattedMessage}");
         }
 
         /// <summary>
@@ -125,14 +125,7 @@ namespace DevSample
                 {
                     using (var writer = new StreamWriter(_logFilePath, false, Encoding.UTF8))
                     {
-#if NETCOREAPP3_0_OR_GREATER
-                        foreach (var chunk in _logBuffer.GetChunks())
-                        {
-                            writer.Write(chunk);
-                        }
-#else
                         writer.Write(_logBuffer.ToString());
-#endif
                     }
                 }
                 catch (Exception ex)
