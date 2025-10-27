@@ -121,14 +121,22 @@ namespace DevSample
         {
             if (_logBuffer.Length > 0)
             {
-                string output = _logBuffer.ToString();
-
                 try
                 {
-                    File.WriteAllText(_logFilePath, output);
+                    using (var writer = new StreamWriter(_logFilePath, false, Encoding.UTF8))
+                    {
+#if NETCOREAPP3_0_OR_GREATER
+                        foreach (var chunk in _logBuffer.GetChunks())
+                        {
+                            writer.Write(chunk);
+                        }
+#else
+                        writer.Write(_logBuffer.ToString());
+#endif
+                    }
                 }
                 catch (Exception ex)
-        {
+                {
                     Console.WriteLine($"Failed to write logs to file: {ex.Message}");
                 }
 
