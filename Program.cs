@@ -127,13 +127,13 @@ namespace DevSample
                     {
                         writer.Write(_logBuffer.ToString());
                     }
+
+                    _logBuffer.Clear();
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Failed to write logs to file: {ex.Message}");
                 }
-
-                _logBuffer.Clear();
             }
         }
     }
