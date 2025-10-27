@@ -1,26 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DevSample
 {
     class Program
     {
-
         static readonly int _cyclesToRun;
         static readonly int _samplesToLoad;
         static readonly DateTime _sampleStartDate;
         static readonly TimeSpan _sampleIncrement;
-        
 
         static Program()
         {
             //Note: these settings should not be modified
-
-            _cyclesToRun = Environment.ProcessorCount  > 1 ? Environment.ProcessorCount / 2 : 1; //hopefully we have more than 1 core to work with, run cores/2 cycles with a max of 4 cycles
+            _cyclesToRun = Environment.ProcessorCount > 1 ? Environment.ProcessorCount / 2 : 1; //hopefully we have more than 1 core to work with, run cores/2 cycles with a max of 4 cycles
             _cyclesToRun = _cyclesToRun > 4 ? 4 : _cyclesToRun;
             _samplesToLoad = 222222;
             _sampleStartDate = new DateTime(1990, 1, 1, 1, 1, 1, 1);
@@ -29,14 +22,10 @@ namespace DevSample
 
         static void Main(string[] args)
         {
-
-            
             Stopwatch totalMonitor = new Stopwatch();
             totalMonitor.Start();
 
             LogMessage($"Starting Execution on a {Environment.ProcessorCount} core system. A total of {_cyclesToRun} cycles will be run");
-
-           
 
             for (int i = 0; i < _cyclesToRun; i++)
             {
@@ -51,7 +40,6 @@ namespace DevSample
 
                     LogMessage($"Cycle {i} Started Sample Load.");
 
-
                     cycleTimer.Start();
 
                     sampleGenerator.LoadSamples(_samplesToLoad);
@@ -61,9 +49,7 @@ namespace DevSample
 
                     LogMessage($"Cycle {i} Finished Sample Load. Load Time: {cycleElapsedTime.TotalMilliseconds.ToString("N")} ms.");
 
-
                     LogMessage($"Cycle {i} Started Sample Validation.");
-
 
                     cycleTimer.Restart();
 
@@ -73,8 +59,6 @@ namespace DevSample
                     cycleElapsedTime = cycleTimer.Elapsed;
 
                     LogMessage($"Cycle {i} Finished Sample Validation. Total Samples Validated: {sampleGenerator.SamplesValidated}. Validation Time: {cycleElapsedTime.TotalMilliseconds.ToString("N")} ms.");
-
-
 
                     float valueSum = 0;
 
@@ -86,15 +70,12 @@ namespace DevSample
                     //TODO: why do we only seem to get 7 digits of precision? The CEO wants to see at least 20!
                     LogMessage($"Cycle {i} Sum of All Samples: {valueSum.ToString("N")}.");
 
-
                     LogMessage($"Cycle {i} Finished. Total Cycle Time: {cycleElapsedTime.TotalMilliseconds.ToString("N")} ms.");
-
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     LogMessage($"Execution Failed!\n{ex.ToString()}");
                 }
-
             }
 
             totalMonitor.Stop();
@@ -102,18 +83,13 @@ namespace DevSample
             LogMessage("-----");
             LogMessage($"Execution Finished. Total Elapsed Time: {totalMonitor.Elapsed.TotalMilliseconds.ToString("N")} ms.");
 
-
             Console.Read();
-
         }
-
-
 
         static void LogMessage(string message)
         {
-
             LogToFile(message);
-            Console.WriteLine($"{DateTime.Now.ToString("HH:mm:ss.fffff")} - {message}");
+            Console.WriteLine($"{DateTime.Now:HH:mm:ss.fffff} - {message}");
         }
 
         static void LogToFile(string message)
